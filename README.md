@@ -188,6 +188,12 @@ USER>zw ^test
 
 You can also find other examples in the [unit test folder](https://github.com/jrpereirajr/python-globals-serializer-example/tree/master/tests/UnitTest/IrisGlobalSerializer).
 
+To run the unit tests, execute this command:
+
+```
+USER>zpm "python-globals-serializer-example test -v"
+```
+
 ## Todo list:
 
 - Implement serialization/deserialization to Python collection types

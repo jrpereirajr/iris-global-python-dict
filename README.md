@@ -186,6 +186,62 @@ USER>zw ^test
 ^test("idx")=2
 ```
 
+Serialization of a Python dictionay object:
+
+```
+USER>k ^test
+
+USER>Do $system.Python.Shell()
+
+Python 3.8.10 (default, Sep 28 2021, 16:10:42) 
+[GCC 9.3.0] on linux
+Type quit() or Ctrl-D to exit this shell.
+>>> from iris_global_serializer import IrisGlobalSerializer
+>>> ensurance = dict({"name": "Ensurance Company", "value": "10000", "due": "2022-12-31"})
+>>> mycar = dict({"maker": "Toyota", "model": "RAV4", "ensurance": ensurance})
+>>> mycar
+{'maker': 'Toyota', 'model': 'RAV4', 'ensurance': {'name': 'Ensurance Company', 'value': '10000', 'due': '2022-12-31'}}
+>>> serializer = IrisGlobalSerializer(gname="^test")
+>>> goref = serializer.serialize(mycar)
+>>> goref
+1
+>>> quit()
+
+USER>zw ^test
+^test(1,"class")="<class 'dict'>"
+^test(1,"ensurance","oref")=2
+^test(1,"ensurance","type")="<class 'iris_global_object.IrisGlobalObject'>"
+^test(1,"maker","type")="<class 'str'>"
+^test(1,"maker","value")="Toyota"
+^test(1,"model","type")="<class 'str'>"
+^test(1,"model","value")="RAV4"
+^test(2,"class")="<class 'dict'>"
+^test(2,"due","type")="<class 'str'>"
+^test(2,"due","value")="2022-12-31"
+^test(2,"name","type")="<class 'str'>"
+^test(2,"name","value")="Ensurance Company"
+^test(2,"value","type")="<class 'str'>"
+^test(2,"value","value")=10000
+^test("idx")=2
+```
+
+Deserialization of a Python dictionary:
+
+```
+USER>Do $system.Python.Shell()
+
+Python 3.8.10 (default, Sep 28 2021, 16:10:42) 
+[GCC 9.3.0] on linux
+Type quit() or Ctrl-D to exit this shell.
+>>> from iris_global_serializer import IrisGlobalSerializer
+>>> goref = 1
+>>> serializer = IrisGlobalSerializer(gname="^test")
+>>> deserializedObj = serializer.deserialize(goref)
+>>> deserializedObj
+{'ensurance': {'due': '2022-12-31', 'name': 'Ensurance Company', 'value': '10000'}, 'maker': 'Toyota', 'model': 'RAV4'}
+>>> quit()
+```
+
 You can also find other examples in the [unit test folder](https://github.com/jrpereirajr/python-globals-serializer-example/tree/master/tests/UnitTest/IrisGlobalSerializer).
 
 To run the unit tests, execute this command:

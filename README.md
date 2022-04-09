@@ -273,7 +273,7 @@ USER>zw ^test
 ^test("idx")=1
 ```
 
-Deserialization of a Python dictionary:
+Deserialization of a Python list:
 
 ```
 USER>Do $system.Python.Shell()

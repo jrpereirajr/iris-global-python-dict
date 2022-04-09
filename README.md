@@ -89,7 +89,7 @@ If things went as expected, we are able to see the Python objects data in the gl
 
 ```
 USER>zw ^test
-^test(1,"class")="<class 'employee.SalaryEmployee'>"
+^test(1,"_class")="<class 'employee.SalaryEmployee'>"
 ^test(1,"company","oref")=2
 ^test(1,"company","type")="<class 'iris_global_object.IrisGlobalObject'>"
 ^test(1,"id","type")="<class 'int'>"
@@ -102,7 +102,7 @@ USER>zw ^test
 ^test(1,"weekly_salary","value")=123
 ^test(1,"year_salary","type")="<class 'int'>"
 ^test(1,"year_salary","value")=6396
-^test(2,"class")="<class 'employee.Company'>"
+^test(2,"_class")="<class 'employee.Company'>"
 ^test(2,"name","type")="<class 'str'>"
 ^test(2,"name","value")="Company ABC"
 ^test("idx")=2
@@ -167,7 +167,7 @@ Type quit() or Ctrl-D to exit this shell.
 >>> quit()
 
 USER>zw ^test
-^test(1,"class")="<class 'employee.SalaryEmployee'>"
+^test(1,"_class")="<class 'employee.SalaryEmployee'>"
 ^test(1,"company","oref")=2
 ^test(1,"company","type")="<class 'iris_global_object.IrisGlobalObject'>"
 ^test(1,"id","type")="<class 'int'>"
@@ -180,7 +180,7 @@ USER>zw ^test
 ^test(1,"weekly_salary","value")=123
 ^test(1,"year_salary","type")="<class 'int'>"
 ^test(1,"year_salary","value")=6396
-^test(2,"class")="<class 'employee.Company'>"
+^test(2,"_class")="<class 'employee.Company'>"
 ^test(2,"name","type")="<class 'str'>"
 ^test(2,"name","value")="Shift"
 ^test("idx")=2
@@ -208,14 +208,14 @@ Type quit() or Ctrl-D to exit this shell.
 >>> quit()
 
 USER>zw ^test
-^test(1,"class")="<class 'dict'>"
+^test(1,"_class")="<class 'dict'>"
 ^test(1,"ensurance","oref")=2
 ^test(1,"ensurance","type")="<class 'iris_global_object.IrisGlobalObject'>"
 ^test(1,"maker","type")="<class 'str'>"
 ^test(1,"maker","value")="Toyota"
 ^test(1,"model","type")="<class 'str'>"
 ^test(1,"model","value")="RAV4"
-^test(2,"class")="<class 'dict'>"
+^test(2,"_class")="<class 'dict'>"
 ^test(2,"due","type")="<class 'str'>"
 ^test(2,"due","value")="2022-12-31"
 ^test(2,"name","type")="<class 'str'>"
@@ -242,6 +242,55 @@ Type quit() or Ctrl-D to exit this shell.
 >>> quit()
 ```
 
+Serialization of a Python list:
+
+```
+USER>k ^test
+
+USER>Do $system.Python.Shell()
+
+Python 3.8.10 (default, Sep 28 2021, 16:10:42) 
+[GCC 9.3.0] on linux
+Type quit() or Ctrl-D to exit this shell.
+>>> from iris_global_serializer import IrisGlobalSerializer
+>>> mylist = ["apple", "banana", "cherry"]
+>>> mylist
+['apple', 'banana', 'cherry']
+>>> serializer = IrisGlobalSerializer(gname="^test")
+>>> goref = serializer.serialize(mylist)
+>>> goref
+1
+>>> quit()
+
+USER>zw ^test
+^test(1,"_class")="<class 'list'>"
+^test(1,"idx0","type")="<class 'str'>"
+^test(1,"idx0","value")="apple"
+^test(1,"idx1","type")="<class 'str'>"
+^test(1,"idx1","value")="banana"
+^test(1,"idx2","type")="<class 'str'>"
+^test(1,"idx2","value")="cherry"
+^test("idx")=1
+```
+
+Deserialization of a Python dictionary:
+
+```
+USER>Do $system.Python.Shell()
+
+Python 3.8.10 (default, Sep 28 2021, 16:10:42) 
+[GCC 9.3.0] on linux
+Type quit() or Ctrl-D to exit this shell.
+>>> from iris_global_serializer import IrisGlobalSerializer
+>>> goref = 1                                                
+>>> serializer = IrisGlobalSerializer(gname="^test")
+aqui
+>>> deserializedObj = serializer.deserialize(goref)
+>>> deserializedObj
+['apple', 'banana', 'cherry']
+>>> quit()
+```
+
 You can also find other examples in the [unit test folder](https://github.com/jrpereirajr/python-globals-serializer-example/tree/master/tests/UnitTest/IrisGlobalSerializer).
 
 To run the unit tests, execute this command:
@@ -252,5 +301,5 @@ USER>zpm "python-globals-serializer-example test -v"
 
 ## Todo list:
 
-- Implement serialization/deserialization to Python collection types
+- Implement serialization/deserialization to Python general purpose built-in containers such as dict, list, set and tuple
 - Do some performance tests

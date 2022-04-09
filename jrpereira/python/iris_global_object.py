@@ -1,7 +1,8 @@
 import iris
-from typing import Any, MutableMapping
+from typing import Any, MutableMapping, MutableSequence
 import re
 import inspect
+import traceback
 
 class IrisGlobalObject(object):
 
@@ -28,7 +29,7 @@ class IrisGlobalObject(object):
             obj = self.load_obj_from_global_oref(goref)
             self.load(obj)
         # else:
-        #     self.gbl[self.oid, "class"] = str(type(self))
+        #     self.gbl[self.oid, "_class"] = str(type(self))
 
     def get_global_index(self):
         # todo: implement concurrency proof global in index increment
@@ -40,10 +41,13 @@ class IrisGlobalObject(object):
 
     def load(self, oref):
         self.mylog(f"load({oref})")
-        self.gbl[self.oid, "class"] = str(type(oref))
+        self.gbl[self.oid, "_class"] = str(type(oref))
         if isinstance(oref, MutableMapping):
             for prop in oref.keys():
                 setattr(self, prop, oref[prop])
+        elif isinstance(oref, MutableSequence):
+            for idx, item in enumerate(oref):
+                setattr(self, "idx"+str(idx), item)
         else:
             if hasattr(oref, "__dict__"):
                 for prop in oref.__dict__:
@@ -77,14 +81,14 @@ class IrisGlobalObject(object):
         if self.gbl[goref]:
             return
         
-        obj_class = self.gbl[goref, "class"]
+        obj_class = self.gbl[goref, "_class"]
         
         class_type = self.get_class_type(obj_class)
         class_init_params = self.get_class_init_parameters(class_type)
         init_params = {}
         other_props = {}
 
-        prop = self.gbl.order([goref, "class"])
+        prop = self.gbl.order([goref, "_class"])
         while not prop is None:
             prop_type = self.gbl[goref, prop, "type"]
             prop_value = self.gbl[goref, prop, "value"]
@@ -108,6 +112,8 @@ class IrisGlobalObject(object):
         for prop, value in other_props.items():
             if isinstance(obj, MutableMapping):
                 obj[prop] = value
+            elif isinstance(obj, MutableSequence):
+                obj.append(value)
             else:
                 setattr(obj, prop, value)
             
@@ -159,8 +165,8 @@ class IrisGlobalObject(object):
         if __name in IrisGlobalObject.my_props: # todo: try to use hasattr(self, __name)
             super().__setattr__(__name, __value)
         else:
-            if self.gbl[self.oid, "class"] is None:
-                self.gbl[self.oid, "class"] = str(type(self))
+            if self.gbl[self.oid, "_class"] is None:
+                self.gbl[self.oid, "_class"] = str(type(self))
 
             # if oref is valid and has a __name attr, set it up
             if not self.oref is None and hasattr(self.oref, __name):
@@ -201,3 +207,12 @@ class IrisGlobalObject(object):
     def mylog(self, msg):
         if self.verbose:
             print(msg)
+
+    def varprint(self, var):
+        # source: https://stackoverflow.com/a/26240512/345422
+        stack = traceback.extract_stack()
+        filename, lineno, function_name, code = stack[-2]
+        vars_name = re.compile(r'\((.*?)\).*$').search(code).groups()[0]
+        # print(f"{vars_name}: {var} [{(filename, lineno, function_name)}]")
+        print(f"{vars_name}: {var}")
+        return

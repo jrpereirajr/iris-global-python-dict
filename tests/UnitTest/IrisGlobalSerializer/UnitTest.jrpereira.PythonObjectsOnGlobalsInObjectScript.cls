@@ -56,7 +56,7 @@ Method TestObjectTypes()
 
 /// Test if it's possible to set a wrapperd object property
 /// ** Removed due raising this issue: LogStateStatus:0:TestObjectTypesSetObjPropAfter: ERROR #5002: ObjectScript error: <PARAMETER>%OnClose+1^%SYS.Python.1  <<==== **FAILED**   PythonObjectsOnGlobals:UnitTest.jrpereira.PythonObjectsOnGlobalsInObjectScript:TestObjectTypesSetObjPropAfter
-Method xTestObjectTypesSetObjPropAfter()
+Method xxTestObjectTypesSetObjPropAfter()
 {
   Set IrisGlobalObjectType = ##class(%SYS.Python).Import("iris_global_object")
   Set employeeType = ##class(%SYS.Python).Import("employee")

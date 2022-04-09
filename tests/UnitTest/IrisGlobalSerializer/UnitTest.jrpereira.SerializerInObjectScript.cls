@@ -23,7 +23,7 @@ Method TestSerializer()
   Set serializer = IrisGlobalSerializerType.IrisGlobalSerializer(gname)
   Set oid = serializer.serialize(emp)
 
-  Do $$$AssertEquals(@gname@(oid,"class"), "<class 'employee.SalaryEmployee'>")
+  Do $$$AssertEquals(@gname@(oid,"_class"), "<class 'employee.SalaryEmployee'>")
   Do $$$AssertEquals(@gname@(oid,"id","type"),"<class 'int'>")
   Do $$$AssertEquals(@gname@(oid,"id","value"),10)
   Do $$$AssertEquals(@gname@(oid,"name","type"),"<class 'str'>")
@@ -36,7 +36,7 @@ Method TestSerializer()
   Do $$$AssertEquals(@gname@(oid,"year_salary","value"),6396)
   Set companyOID = @gname@(oid,"company","oref")
   Do $$$AssertEquals(@gname@(oid,"company","type"),"<class 'iris_global_object.IrisGlobalObject'>")
-  Do $$$AssertEquals(@gname@(companyOID,"class"),"<class 'employee.Company'>")
+  Do $$$AssertEquals(@gname@(companyOID,"_class"),"<class 'employee.Company'>")
   Do $$$AssertEquals(@gname@(companyOID,"name","type"),"<class 'str'>")
   Do $$$AssertEquals(@gname@(companyOID,"name","value"),"Company ABC")
 }
@@ -77,7 +77,7 @@ Method TestSerializeDictonary()
   Set serializer = IrisGlobalSerializerType.IrisGlobalSerializer(gname)
   Set oid = serializer.serialize(mycar)
 
-  Do $$$AssertEquals(@gname@(oid,"class"), "<class 'dict'>")
+  Do $$$AssertEquals(@gname@(oid,"_class"), "<class 'dict'>")
   Do $$$AssertEquals(@gname@(oid,"color","type"), "<class 'str'>")
   Do $$$AssertEquals(@gname@(oid,"color","value"), "blue")
   Do $$$AssertEquals(@gname@(oid,"ensurance","type"), "<class 'NoneType'>")
@@ -141,7 +141,7 @@ Method TestSerializeDictonaryWithObject()
   Set serializer = IrisGlobalSerializerType.IrisGlobalSerializer(gname)
   Set oid = serializer.serialize(mycar)
 
-  Do $$$AssertEquals(@gname@(oid,"class"), "<class 'dict'>")
+  Do $$$AssertEquals(@gname@(oid,"_class"), "<class 'dict'>")
   Do $$$AssertNotEquals(@gname@(oid,"ensurance","oref"), "")
   Do $$$AssertEquals(@gname@(oid,"ensurance","type"), "<class 'iris_global_object.IrisGlobalObject'>")
   Do $$$AssertEquals(@gname@(oid,"maker","type"), "<class 'str'>")
@@ -150,7 +150,7 @@ Method TestSerializeDictonaryWithObject()
   Do $$$AssertEquals(@gname@(oid,"model","value"), "RAV4")
 
   Set oid = @gname@(oid,"ensurance","oref")
-  Do $$$AssertEquals(@gname@(oid,"class"), "<class 'dict'>")
+  Do $$$AssertEquals(@gname@(oid,"_class"), "<class 'dict'>")
   Do $$$AssertEquals(@gname@(oid,"due","type"), "<class 'str'>")
   Do $$$AssertEquals(@gname@(oid,"due","value"), "2022-12-31")
   Do $$$AssertEquals(@gname@(oid,"name","type"), "<class 'str'>")
@@ -163,7 +163,7 @@ Method TestDeserializerDictonaryWithObject()
 {
   Set IrisGlobalSerializerType = ##class(%SYS.Python).Import("iris_global_serializer")
 
-  Set gname = "^test" //..#GNAME
+  Set gname = ..#GNAME
   
   Set ensurance = ##class(%SYS.Python).Builtins().dict()
   Do ensurance.setdefault("name", "Ensurance Company")
@@ -186,6 +186,47 @@ Method TestDeserializerDictonaryWithObject()
   Do $$$AssertEquals(obj."__getitem__"("due"), ensurance."__getitem__"("due"), "should had deserialized property due")
   Do $$$AssertEquals(obj."__getitem__"("name"), ensurance."__getitem__"("name"), "should had deserialized property name")
   Do $$$AssertEquals(obj."__getitem__"("value"), ensurance."__getitem__"("value"), "should had deserialized property value")
+}
+
+Method TestSerializeList()
+{
+  Set IrisGlobalSerializerType = ##class(%SYS.Python).Import("iris_global_serializer")
+
+  Set gname = ..#GNAME
+  
+  Set mylist = ##class(%SYS.Python).Builtins().list()
+  Do mylist.append("apple")
+  Do mylist.append("banana")
+  Do mylist.append("cherry")
+
+  Set serializer = IrisGlobalSerializerType.IrisGlobalSerializer(gname)
+  Set oid = serializer.serialize(mylist)
+
+  Do $$$AssertEquals(@gname@(oid,"_class"), "<class 'list'>")
+  Do $$$AssertEquals(@gname@(oid,"idx0","type"), "<class 'str'>")
+  Do $$$AssertEquals(@gname@(oid,"idx0","value"), "apple")
+  Do $$$AssertEquals(@gname@(oid,"idx1","type"), "<class 'str'>")
+  Do $$$AssertEquals(@gname@(oid,"idx1","value"), "banana")
+  Do $$$AssertEquals(@gname@(oid,"idx2","type"), "<class 'str'>")
+  Do $$$AssertEquals(@gname@(oid,"idx2","value"), "cherry")
+}
+
+Method TestDeserializerList()
+{
+  Set IrisGlobalSerializerType = ##class(%SYS.Python).Import("iris_global_serializer")
+
+  Set gname = ..#GNAME
+  
+  Set mylist = ##class(%SYS.Python).Builtins().list()
+  Do mylist.append("apple")
+  Do mylist.append("banana")
+  Do mylist.append("cherry")
+
+  Set serializer = IrisGlobalSerializerType.IrisGlobalSerializer(gname)
+  Set oid = serializer.serialize(mylist)
+  Set deserializedObj = serializer.deserialize(oid)
+
+  Do $$$AssertEquals(deserializedObj."__repr__"(), mylist."__repr__"(), "should had deserialized same values, in same order")
 }
 
 }

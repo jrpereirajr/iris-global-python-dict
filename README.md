@@ -284,7 +284,6 @@ Type quit() or Ctrl-D to exit this shell.
 >>> from iris_global_serializer import IrisGlobalSerializer
 >>> goref = 1                                                
 >>> serializer = IrisGlobalSerializer(gname="^test")
-aqui
 >>> deserializedObj = serializer.deserialize(goref)
 >>> deserializedObj
 ['apple', 'banana', 'cherry']

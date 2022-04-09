@@ -1,5 +1,5 @@
 import iris
-from typing import Any
+from typing import Any, MutableMapping
 import re
 import inspect
 
@@ -41,9 +41,13 @@ class IrisGlobalObject(object):
     def load(self, oref):
         self.mylog(f"load({oref})")
         self.gbl[self.oid, "class"] = str(type(oref))
-        if hasattr(oref, "__dict__"):
-            for prop in oref.__dict__:
-                setattr(self, prop, getattr(oref, prop))
+        if isinstance(oref, MutableMapping):
+            for prop in oref.keys():
+                setattr(self, prop, oref[prop])
+        else:
+            if hasattr(oref, "__dict__"):
+                for prop in oref.__dict__:
+                    setattr(self, prop, getattr(oref, prop))
 
     def get_class_type(self, class_type_name):
         self.mylog(f"get_class_type({class_type_name})")
@@ -53,10 +57,14 @@ class IrisGlobalObject(object):
             return None
         class_type_name = p.group(1)
         parts = class_type_name.split('.')
-        module = ".".join(parts[:-1])
+        if len(parts) > 1:
+            module = ".".join(parts[:-1])
+            parts = parts[1:]
+        else:
+            module = "builtins"
         m = __import__(module)
-        for comp in parts[1:]:
-            m = getattr(m, comp)            
+        for comp in parts:
+            m = getattr(m, comp)
         return m
     
     def get_class_init_parameters(self, class_type):
@@ -98,7 +106,10 @@ class IrisGlobalObject(object):
 
         obj = class_type(**init_params)
         for prop, value in other_props.items():
-            setattr(obj, prop, value)
+            if isinstance(obj, MutableMapping):
+                obj[prop] = value
+            else:
+                setattr(obj, prop, value)
             
         wrapper = IrisGlobalObject(gname=self.gname)
         wrapper.oref = obj
